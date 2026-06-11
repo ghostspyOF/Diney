@@ -1237,15 +1237,30 @@ if(buttonBadge) {
         }
 
         function changeQty(index, delta) {
-            cart[index].qty += delta;
-            if(cart[index].qty <= 0) return removeItem(index);
-            renderCart();
-        }
+    cart[index].qty += delta;
+    
+    // Esconde o Pix antigo se o cliente mexer na quantidade
+    document.getElementById('blocoPix').style.display = 'none';
+    document.getElementById('btnGerarPix').style.display = 'block';
+    document.getElementById('btnGerarPix').innerText = "Pagar com Pix";
+    if(typeof checkoutInterval !== 'undefined') clearInterval(checkoutInterval);
 
-        function removeItem(index) {
-            cart.splice(index, 1);
-            renderCart();
-        }
+    if(cart[index].qty <= 0) return removeItem(index);
+    renderCart();
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+
+    // Esconde o Pix antigo se o cliente remover um item
+    document.getElementById('blocoPix').style.display = 'none';
+    document.getElementById('btnGerarPix').style.display = 'block';
+    document.getElementById('btnGerarPix').innerText = "Pagar com Pix";
+    if(typeof checkoutInterval !== 'undefined') clearInterval(checkoutInterval);
+
+    renderCart();
+}
+
 
                 // IDEIA 5: Gerenciamento do Scroll Lock ao abrir/fechar modais
         function openCart() { 
@@ -1321,6 +1336,13 @@ if(buttonBadge) {
         document.body.classList.remove('modal-open');
     }
     
+    // --- LINHAS PARA CORRIGIR O ERRO DO PIX ---
+    document.getElementById('blocoPix').style.display = 'none'; // Esconde o Pix antigo de 4 produtos
+    document.getElementById('btnGerarPix').style.display = 'block'; // Mostra o botão para gerar um novo Pix
+    document.getElementById('btnGerarPix').innerText = "Pagar com Pix"; // Reseta o texto do botão
+    if(typeof checkoutInterval !== 'undefined') clearInterval(checkoutInterval); // Para a checagem antiga se houver
+    // ------------------------------------------
+    
     // Se o pagamento já tinha sido aprovado e ele apenas fechou a tela, reseta o layout para a próxima vez
     if (document.getElementById('containerAlertaSucesso').style.display === 'block') {
         document.getElementById('containerAlertaSucesso').style.display = 'none';
@@ -1329,6 +1351,7 @@ if(buttonBadge) {
         document.getElementById('statusPagamento').innerText = "⏳ Aguardando pagamento...";
     }
 }
+
 
 
         function pegarLocalizacao() {

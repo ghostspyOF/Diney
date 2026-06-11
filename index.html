@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -720,6 +721,22 @@
     33% { color: #2a9d8f; transform: scale(1.2); }    /* Verde */
     66% { color: #4a90e2; transform: scale(1); }      /* Azul */
 }
+    
+    /* Modal de Instrução do Pix */
+.modal-aviso-pix {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 450px; height: 100%;
+    background: rgba(0, 0, 0, 0.5); z-index: 6000;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.box-aviso-pix {
+    background: white; padding: 25px; border-radius: 24px;
+    text-align: center; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border: 2px solid #32bcad; font-family: 'Quicksand', sans-serif;
+}
+.box-aviso-pix h4 { color: #4a373b; font-size: 18px; font-weight: 900; margin: 12px 0; }
+.box-aviso-pix p { color: #654f53; font-size: 14px; margin-bottom: 8px; text-align: left; }
+
 
     </style>
 </head>
@@ -814,21 +831,22 @@
 
         <div id="areaNome" style="display:none; margin-top: 20px;">
             <p style="font-size: 18px;font-weight:700; margin-bottom: 10px; text-align: left;" class="nav-item">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 2 2 2zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>  
-                Quem irá receber/retirar o pedido?</p>
+            <img style="width: 55px; height: 55px;" src="https://i.ibb.co/cKtrGWjZ/99715.png" alt="logo pix">                                                                                    
+              Quem irá receber/retirar o pedido?</p>
             <input type="text" id="nomeCliente" class="input-cliente" placeholder="Digite seu nome completo" autocomplete="name" required>
             
             <p style="margin-top: 20px; font-weight: bold; margin-bottom: 15px; text-align: left;">Como prefere receber o pedido?</p>
             
             <div class="metodo-container">
                 <div class="metodo-card active" onclick="selecionarMetodo('Vou buscar pessoalmente', this)">
-                    <span class="metodo-icon">🛍️</span>
+                    <img style="width: 55px; height: 55px;" src="https://i.ibb.co/xtnYRYB7/99713.png" alt="logo pix">                                                                  
                     <span class="metodo-titulo">Retirar Pessoalmente</span>
-                    <span class="metodo-sub">Vou buscar na Ely</span>
+                    <span class="metodo-sub">Eu irei buscar</span>
                 </div>
                 
                 <div class="metodo-card" onclick="selecionarMetodo('Vou mandar Uber/99 retirar', this)">
-                    <span class="metodo-icon">🚗 🏍️</span>
+                     <img style="width: 110px; height: 50px;" src="https://i.ibb.co/1YhkXdw2/99708.png" alt="logo pix">        
+                    
                     <span class="metodo-titulo">Mandar Uber/99</span>
                     <span class="metodo-sub">Aplicativo retira para mim</span>
                 </div>
@@ -840,10 +858,14 @@
     <p style="font-weight: 700; color: #166534;">Pix Gerado com Sucesso!</p>
     <textarea id="inputPixCopiaCola" readonly style="width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #34d399; font-size: 11px; height: 60px;"></textarea>
     <button class="btn-add" onclick="copiarPix()" style="background: #2a9d8f; color: white; margin-top: 10px;">Copiar Código Pix</button>
-    <p id="statusPagamento" style="margin-top: 15px; font-weight: bold; color: #15803d; animation: blink 1s infinite;">⏳ Aguardando pagamento...</p>
+    <p id="statusPagamento" style="margin-top: 15px; font-weight: bold; color: #15803d; animation: blink 1s infinite;">⏳ Aguardando pagamento...<br>Volte aqui assim que realizar o pagamento.</p>
 </div>
 
-<button class="btn-add" id="btnGerarPix" onclick="iniciarFluxoPagamento()" style="background:var(--accent-dark); color:white; margin-top: 25px;">Pagar com Pix</button>
+<button class="btn-add" id="btnGerarPix" onclick="mostrarInstrucoesPix()" style="background: var(--accent-dark); color: white; margin-top: 25px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+    <img style="width: 25px; height: 25px; blrder-radius: 50%;" src="https://i.ibb.co/1JJQd5Gm/99691.png" alt="logo pix">
+         
+    Pagar com Pix
+</button>
 
         <div id="containerAlertaSucesso" style="display: none; margin-top: 25px;">
     <div class="alerta-professor">
@@ -901,6 +923,20 @@
 </a>
 
     </nav>
+    
+    <div id="modalAvisoPix" class="modal-aviso-pix">
+    <div class="box-aviso-pix">
+        <img style="width: 40px; height: 40px; blrder-radius: 50%;" src="https://i.ibb.co/1JJQd5Gm/99691.png" alt="logo pix">
+              
+        <h4>Como funciona o pagamento?</h4>
+        <p><strong>1.</strong> Clique no botão abaixo para prosseguir.</p>
+        <p><strong>2.</strong> Vamos gerar um código Pix Copia e Cola.</p>
+        <p><strong>3.</strong> Abra o app do seu banco e pague o Pix.</p>
+        <p><strong>4.</strong> <span style="color: red;">Volte Aqui</span> assim que o sistema reconhecer o pagamento, será liberado o botão do WhatsApp na hora para darmos continuidade no seu atendimento.</p>
+        <button class="btn-add" onclick="fecharAvisoEGerarPix()" style="background:#32bcad; color:white; margin-top:15px;">Entendi, Gerar Pix</button>
+    </div>
+</div>
+
 
     <script>
         const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRWAYesjo-68FhU8iq_imTIvYnrQLPadVr1HN05wZimtpBkoIHKc-zl9AglUb71gT6KO54eQCnH_rZK/pub?output=csv';
@@ -1455,6 +1491,19 @@ function copiarPix() {
     document.execCommand('copy');
     alert('Código Pix copiado com sucesso! Vá ao seu banco e pague na opção Pix Copia e Cola.');
 }
+    
+    function mostrarInstrucoesPix() {
+    const nome = document.getElementById('nomeCliente').value;
+    if(!nome) return alert("Por favor, digite seu nome.");
+    
+    document.getElementById('modalAvisoPix').style.display = 'flex';
+}
+
+function fecharAvisoEGerarPix() {
+    document.getElementById('modalAvisoPix').style.display = 'none';
+    iniciarFluxoPagamento();
+}
+
 
 async function iniciarFluxoPagamento() {
     const nome = document.getElementById('nomeCliente').value;

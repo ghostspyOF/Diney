@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -819,31 +820,45 @@
             <input type="text" id="nomeCliente" class="input-cliente" placeholder="Digite seu nome completo" autocomplete="name" required>
             
             <p style="margin-top: 20px; font-weight: bold; margin-bottom: 15px; text-align: left;">Como prefere receber o pedido?</p>
-            
-            <div class="metodo-container">
-                <div class="metodo-card active" onclick="selecionarMetodo('Vou buscar pessoalmente', this)">
-                    <span class="metodo-icon">🛍️</span>
-                    <span class="metodo-titulo">Retirar Pessoalmente</span>
-                    <span class="metodo-sub">Vou buscar na Ely</span>
-                </div>
-                
-                <div class="metodo-card" onclick="selecionarMetodo('Vou mandar Uber/99 retirar', this)">
-                    <span class="metodo-icon">🚗 🏍️</span>
-                    <span class="metodo-titulo">Mandar Uber/99</span>
-                    <span class="metodo-sub">Aplicativo retira para mim</span>
-                </div>
-            </div>
 
-            <input type="hidden" id="metodoRetirada" value="Vou buscar pessoalmente">
-
-            <div id="blocoPix" style="display: none; margin-top: 20px; background: #f0fdf4; padding: 20px; border-radius: 14px; border: 1px solid #bbf7d0;">
-    <p style="font-weight: 700; color: #166534;">Pix Gerado com Sucesso!</p>
-    <textarea id="inputPixCopiaCola" readonly style="width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #34d399; font-size: 11px; height: 60px;"></textarea>
-    <button class="btn-add" onclick="copiarPix()" style="background: #2a9d8f; color: white; margin-top: 10px;">Copiar Código Pix</button>
-    <p id="statusPagamento" style="margin-top: 15px; font-weight: bold; color: #15803d; animation: blink 1s infinite;">⏳ Aguardando pagamento...</p>
+<div class="metodo-container">
+    <div class="metodo-card active" onclick="selecionarMetodo('Vou buscar pessoalmente', this)">
+        <span class="metodo-icon">🛍️</span>
+        <span class="metodo-titulo">Retirar Pessoalmente</span>
+        <span class="metodo-sub">Vou buscar na Ely</span>
+    </div>
+    
+    <div class="metodo-card" onclick="selecionarMetodo('Vou mandar Uber/99 retirar', this)">
+        <span class="metodo-icon">🚗 🏍️</span>
+        <span class="metodo-titulo">Mandar Uber/99</span>
+        <span class="metodo-sub">Aplicativo retira para mim</span>
+    </div>
 </div>
 
-<button class="btn-add" id="btnGerarPix" onclick="iniciarFluxoPagamento()" style="background:var(--accent-dark); color:white; margin-top: 25px;">Pagar com Pix</button>
+<p style="margin-top: 20px; font-weight: bold; margin-bottom: 15px; text-align: left;">Forma de Pagamento</p>
+<div class="metodo-container">
+    <div class="metodo-card active" onclick="selecionarFormaPagamento('Pix Copia e Cola', this)">
+        <span class="metodo-icon">🔸</span>
+        <span class="metodo-titulo">Pix Comum</span>
+        <span class="metodo-sub">Copia e cola tradicional</span>
+    </div>
+    <div class="metodo-card" onclick="selecionarFormaPagamento('Nubank', this)">
+        <span class="metodo-icon">💜</span>
+        <span class="metodo-titulo">Nubank</span>
+        <span class="metodo-sub">Ir direto para o App</span>
+    </div>
+</div>
+
+<input type="hidden" id="metodoRetirada" value="Vou buscar pessoalmente">
+<input type="hidden" id="formaPagamento" value="Pix Copia e Cola">
+
+<button id="btnGerarPix" class="btn-add" onclick="iniciarFluxoPagamento()" style="background: var(--accent-dark); color: white; margin-top: 20px;">Pagar com Pix</button>
+
+<div id="blocoPix" style="display: none; margin-top: 20px; background: #fdf2f4; padding: 15px; border-radius: 14px; border: 1px dashed var(--accent-dark);">
+    <p id="statusPagamento" style="font-weight: bold; color: var(--rodape); margin-bottom: 10px;">⏳ Aguardando pagamento...</p>
+    <input type="text" id="inputPixCopiaCola" class="input-cliente" style="margin: 5px 0; text-align: center;" readonly>
+    <button class="btn-add" onclick="copiarPix()" style="background: var(--verde); color: white; padding: 10px; margin-top: 5px;">Copiar Código Pix</button>
+</div>
 
         <div id="containerAlertaSucesso" style="display: none; margin-top: 25px;">
     <div class="alerta-professor">
@@ -1418,7 +1433,23 @@ if(buttonBadge) {
             window.open(`https://wa.me/5562995679219?text=${mensagem}`, '_blank');
         }
     
+  function selecionarFormaPagamento(valor, elemento) {
+    document.getElementById('formaPagamento').value = valor;
+    // Remove o active apenas dos cards de pagamento (os dois últimos adicionados)
+    elemento.parentNode.querySelectorAll('.metodo-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    elemento.classList.add('active');
     
+    // Altera o texto do botão principal dinamicamente
+    const btnGerar = document.getElementById('btnGerarPix');
+    if(valor === 'Nubank') {
+        btnGerar.innerText = "Pagar via Nubank";
+    } else {
+        btnGerar.innerText = "Pagar com Pix";
+    }
+}
+  
     
     
     
@@ -1469,6 +1500,7 @@ async function iniciarFluxoPagamento() {
         // RECONHECE O PAGAMENTO AUTOMATICAMENTE
         verificarStatusPagamento(dadosPix.idTransacao);
 
+
     } catch (error) {
         console.error("Erro na requisição:", error);
         alert("Erro de conexão ao gerar pagamento Pix. Tente novamente.");
@@ -1479,7 +1511,7 @@ async function iniciarFluxoPagamento() {
 }
 
 
-function verificarStatusPagamento(idTransacao) {
+function verificarStatusPagamento(idTransacao, copiaColaCodigo) {
     checkoutInterval = setInterval(async () => {
         try {
             const resposta = await fetch(`${URL_DO_APPS_SCRIPT}?id=${idTransacao}`);
@@ -1488,10 +1520,17 @@ function verificarStatusPagamento(idTransacao) {
             if (statusData.pago === true) {
                 clearInterval(checkoutInterval); // Para de checar
                 
-                // Esconde o bloco de instruções do PIX copia e cola
                 document.getElementById('blocoPix').style.display = 'none';
                 
-                // Exibe o novo alerta customizado com o botão estilizado dentro
+                const formaEscolhida = document.getElementById('formaPagamento').value;
+                if(formaEscolhida === 'Nubank') {
+                    // Agora usamos a variável correta passada por parâmetro
+                    const linkNubank = "nuapp://pix/pay?code=" + encodeURIComponent(copiaColaCodigo);
+                    setTimeout(() => {
+                        window.location.href = linkNubank;
+                    }, 1500);
+                }
+
                 document.getElementById('containerAlertaSucesso').style.display = 'block';
             }
         } catch (e) {

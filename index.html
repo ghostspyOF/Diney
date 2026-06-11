@@ -1444,15 +1444,17 @@ async function iniciarFluxoPagamento() {
 
     try {
         // Envia como formulário URL-Encoded (o jeito mais seguro para o Apps Script não dar erro de CORS)
-        const resposta = await fetch(URL_DO_APPS_SCRIPT, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                'valor': total,
-                'cliente': nome
-            })
-        });
+        // Substitua o trecho do fetch dentro de iniciarFluxoPagamento() por este:
+const resposta = await fetch(URL_DO_APPS_SCRIPT, {
+    method: 'POST',
+    mode: 'cors', // Permite o tráfego entre domínios
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Truque para o Apps Script aceitar sem disparar preflight complexo de CORS
+    body: JSON.stringify({
+        valor: total,
+        cliente: nome
+    })
+});
+
         
         const dadosPix = await resposta.json(); 
 
@@ -1480,7 +1482,8 @@ async function iniciarFluxoPagamento() {
 
 function verificarStatusPagamento(idTransacao) {
     checkoutInterval = setInterval(async () => {
-        try {
+        try {           
+            
             const resposta = await fetch(`${URL_DO_APPS_SCRIPT}?id=${idTransacao}`);
             const statusData = await resposta.json(); 
 

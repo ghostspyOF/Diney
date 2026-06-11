@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -722,6 +721,17 @@
     66% { color: #4a90e2; transform: scale(1); }      /* Azul */
 }
 
+    /* Animação para pulsar para frente e para trás */
+.pulsar-texto {
+    display: inline-block;
+    animation: pulsoFrase 1.5s ease-in-out infinite;
+}
+
+@keyframes pulsoFrase {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); } /* Cresce levemente para frente */
+}
+
     </style>
 </head>
 <body>
@@ -855,7 +865,8 @@
 <button id="btnGerarPix" class="btn-add" onclick="iniciarFluxoPagamento()" style="background: var(--accent-dark); color: white; margin-top: 20px;">Pagar com Pix</button>
 
 <div id="blocoPix" style="display: none; margin-top: 20px; background: #fdf2f4; padding: 15px; border-radius: 14px; border: 1px dashed var(--accent-dark);">
-    <p id="statusPagamento" style="font-weight: bold; color: var(--rodape); margin-bottom: 10px;">⏳ Aguardando pagamento...</p>
+    <p id="statusPagamento" style="font-weight: bold; color: var(--rodape); margin-bottom: 10px;"><span class="pulsar-texto">⏳ Aguardando pagamento...</span></p>
+
     <input type="text" id="inputPixCopiaCola" class="input-cliente" style="margin: 5px 0; text-align: center;" readonly>
     <button class="btn-add" onclick="copiarPix()" style="background: var(--verde); color: white; padding: 10px; margin-top: 5px;">Copiar Código Pix</button>
 </div>
@@ -1492,14 +1503,20 @@ async function iniciarFluxoPagamento() {
             return;
         }
 
-        // MOSTRA O CÓDIGO NA TELA
+                // MOSTRA O CÓDIGO NA TELA
         document.getElementById('inputPixCopiaCola').value = dadosPix.copiaCola;
         document.getElementById('btnGerarPix').style.display = 'none';
         document.getElementById('blocoPix').style.display = 'block';
 
+        // NOVA ADIÇÃO: Se o cliente escolheu Nubank, abre o app imediatamente
+        const formaEscolhida = document.getElementById('formaPagamento').value;
+        if (formaEscolhida === 'Nubank') {
+            const linkNubank = "nuapp://pix/pay?code=" + encodeURIComponent(dadosPix.copiaCola);
+            window.location.href = linkNubank;
+        }
+
         // RECONHECE O PAGAMENTO AUTOMATICAMENTE
         verificarStatusPagamento(dadosPix.idTransacao);
-
 
     } catch (error) {
         console.error("Erro na requisição:", error);
@@ -1511,7 +1528,7 @@ async function iniciarFluxoPagamento() {
 }
 
 
-function verificarStatusPagamento(idTransacao, copiaColaCodigo) {
+function verificarStatusPagamento(idTransacao) {
     checkoutInterval = setInterval(async () => {
         try {
             const resposta = await fetch(`${URL_DO_APPS_SCRIPT}?id=${idTransacao}`);
@@ -1521,16 +1538,6 @@ function verificarStatusPagamento(idTransacao, copiaColaCodigo) {
                 clearInterval(checkoutInterval); // Para de checar
                 
                 document.getElementById('blocoPix').style.display = 'none';
-                
-                const formaEscolhida = document.getElementById('formaPagamento').value;
-                if(formaEscolhida === 'Nubank') {
-                    // Agora usamos a variável correta passada por parâmetro
-                    const linkNubank = "nuapp://pix/pay?code=" + encodeURIComponent(copiaColaCodigo);
-                    setTimeout(() => {
-                        window.location.href = linkNubank;
-                    }, 1500);
-                }
-
                 document.getElementById('containerAlertaSucesso').style.display = 'block';
             }
         } catch (e) {
@@ -1538,6 +1545,8 @@ function verificarStatusPagamento(idTransacao, copiaColaCodigo) {
         }
     }, 5000);
 }
+
+
 
 
 

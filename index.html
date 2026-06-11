@@ -850,8 +850,8 @@
         <div class="circulo-joinha">👍</div>
         <h3>Pagamento Confirmado!</h3>
         <p>Muito obrigado! Seu pagamento foi verificado com sucesso pelo nosso sistema.</p>
-        
-        <button class="btn-whatsapp-custom" onclick="enviarPedidoWhatsApp()">
+
+        <button class="btn-whatsapp-custom" onclick="enviarPedidoWhatsAppAprovado()">            
             <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="22" height="22">
             Finalizar Pedido via WhatsApp
         </button>
@@ -1422,8 +1422,8 @@ if(buttonBadge) {
     
     
     
-    let checkoutInterval; // Controlará a checagem automática do pagamento
-// Cole aqui a URL exata do seu Google Apps Script (App da Web) gerada após o Deploy
+let checkoutInterval; // Controlará a checagem automática do pagamento
+// Sua URL do Google Apps Script
 const URL_DO_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyec-i_NOpRNqyBO0Gerys5VPHKt_hV8KHqjAVF4tX3-alWVJyUr28ByM8ioa6fHO8/exec";
 
 function copiarPix() {
@@ -1433,23 +1433,25 @@ function copiarPix() {
     alert('Código Pix copiado com sucesso! Vá ao seu banco e pague na opção Pix Copia e Cola.');
 }
 
+// 🌟 FUNÇÃO CORRIGIDA: Agora envia os dados num formato que o Google aceita e o robô lê!
 async function iniciarFluxoPagamento() {
     const nome = document.getElementById('nomeCliente').value;
     if(!nome) return alert("Por favor, digite seu nome.");
 
     let total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
     
-     
     document.getElementById('btnGerarPix').innerHTML = `Gerando Pix <span class="ponto-cor ponto-1">.</span><span class="ponto-cor ponto-2">.</span><span class="ponto-cor ponto-3">.</span>`;
-    
 
     try {
-        // Correção no fetch: adicionado o modo para evitar erros de CORS no redirecionamento do Google
+        // Envia como formulário URL-Encoded (o jeito mais seguro para o Apps Script não dar erro de CORS)
         const resposta = await fetch(URL_DO_APPS_SCRIPT, {
             method: 'POST',
-            mode: 'cors', 
-            headers: { 'Content-Type': 'text/plain' }, // Enviar como text/plain evita o pré-envio 'OPTIONS' que o Google rejeita
-            body: JSON.stringify({ valor: total, cliente: nome })
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                'valor': total,
+                'cliente': nome
+            })
         });
         
         const dadosPix = await resposta.json(); 
@@ -1472,12 +1474,9 @@ async function iniciarFluxoPagamento() {
     } catch (error) {
         console.error("Erro na requisição:", error);
         alert("Erro de conexão ao gerar pagamento Pix. Tente novamente.");
-        
         document.getElementById('btnGerarPix').innerHTML = "Pagar com Pix";
-        
     }
 }
-
 
 function verificarStatusPagamento(idTransacao) {
     checkoutInterval = setInterval(async () => {
@@ -1491,7 +1490,7 @@ function verificarStatusPagamento(idTransacao) {
                 // Esconde o bloco de instruções do PIX copia e cola
                 document.getElementById('blocoPix').style.display = 'none';
                 
-                // Exibe o novo alerta customizado com o botão estilizado dentro
+                // Exibe o novo alerta com o botão do WhatsApp
                 document.getElementById('containerAlertaSucesso').style.display = 'block';
             }
         } catch (e) {
@@ -1500,10 +1499,8 @@ function verificarStatusPagamento(idTransacao) {
     }, 5000);
 }
 
-
-
-// NOVA FUNÇÃO CORRIGIDA: Envia para o WhatsApp avisando que o PIX já foi pago e aprovado!
-function enviarPedidoWhatsApp() {
+// 🌟 FUNÇÃO CORRIGIDA: Nome alterado para não dar conflito com a de cima!
+function enviarPedidoWhatsAppAprovado() {
     const nome = document.getElementById('nomeCliente').value;
     if(!nome) return alert("Por favor, digite seu nome.");
     
@@ -1519,41 +1516,32 @@ function enviarPedidoWhatsApp() {
 
     let totalChave = total.toFixed(2); 
 
-    let mensagem = `✅ *NOVO PEDIDO* ✅%0A`;
+    let mensagem = `✅ *NOVO PEDIDO (PAGO VIA PIX)* ✅%0A`;
     mensagem += `🛎️ Prontinho para produção!%0A%0A`;
     mensagem += `*Cliente:* ${nome}%0A`;
     mensagem += `*Localização:* ${userLocation}%0A`;
     mensagem += `*Forma de Entrega/Retirada:* ${metodo}%0A%0A`;
-    mensagem += `🛍️%OA`;
+    mensagem += `🛍️%0A`;
     mensagem += `*Itens:*%0A${itensTexto}%0A`;
     mensagem += `*Total Pago: R$ ${totalChave.replace('.', ',')}*%0A%0A`;
-    mensagem += `🔴 *ATENÇÃO* 🔴%OA`;
-    mensagem += `Nos envie o comprovante do pagamento para confirmarmos e seu pedido e darmos continuidade ao seu atendimento.%OA`;
-    mensagem += `ESTAMOS AGUARDANDO O COMPROVANTE`;
+    mensagem += `O pagamento já foi aprovado automaticamente pelo sistema!`;
 
-    // --- ADICIONE/SUBSTITUA AS LINHAS ABAIXO PARA O RESET ---
     cart = [];
     renderCart();
     
-    // Fecha as telas e remove o travamento de rolagem
     document.body.classList.remove('modal-open');
     document.getElementById('finalizarModal').style.display = 'none';
     document.getElementById('cartModal').style.display = 'none';
 
-    // RESET DOS ELEMENTOS DO MODAL (O QUE DEVE MEXER)
-    document.getElementById('containerAlertaSucesso').style.display = 'none'; // Esconde o alerta do professor
-    document.getElementById('blocoPix').style.display = 'none'; // Garante que o bloco Pix antigo suma
-    document.getElementById('btnGerarPix').style.display = 'block'; // Mostra o botão "Pagar com Pix" novamente
-    document.getElementById('btnGerarPix').innerText = "Pagar com Pix"; // Reseta o texto do botão
-    document.getElementById('statusPagamento').innerText = "⏳ Aguardando pagamento..."; // Reseta o texto de status do Pix
-    document.getElementById('nomeCliente').value = ""; // Limpa o campo do nome do cliente (opcional)
-    // --------------------------------------------------------
+    document.getElementById('containerAlertaSucesso').style.display = 'none'; 
+    document.getElementById('blocoPix').style.display = 'none'; 
+    document.getElementById('btnGerarPix').style.display = 'block'; 
+    document.getElementById('btnGerarPix').innerText = "Pagar com Pix"; 
+    document.getElementById('statusPagamento').innerText = "⏳ Aguardando pagamento..."; 
+    document.getElementById('nomeCliente').value = ""; 
 
-    // Abre o WhatsApp com o pedido pronto
     window.open(`https://wa.me/5562995679219?text=${mensagem}`, '_blank');
 }
-
-
 
     </script>
 </body>

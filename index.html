@@ -783,6 +783,11 @@
     <div class="section-name" style="text-align: center;">Nossos Bombons<br>💗</div>
     
     <div class="carousel-container" id="carrossel-bolos"></div>
+    
+    <hr class="linha-rosa-2">
+    <div class="section-name" style="text-align: center;">Nossas Variedades<br>💗</div>  
+    <div id="lista-produtos-vertical" style="display: flex; flex-direction: column; gap: 15px; padding: 15px;"></div>
+
 
 <div id="cartModal" class="modal-cart">
     
@@ -838,6 +843,11 @@
             <p style="margin-top: 20px; font-weight: bold; margin-bottom: 15px; text-align: left;">Como prefere receber o pedido?</p>
             
             <div class="metodo-container">
+                <div class="metodo-card" id="cardFazerEntrega" style="display: none;" onclick="selecionarMetodo('Nós entregamos', this)">
+                    <img style="width: 55px; height: 55px;" src="https://i.ibb.co/LdqrpS3c/99885.png" alt="logo pix">                                                                                       
+                    <span class="metodo-titulo">Nós entregamos</span>
+                    <span class="metodo-sub">Entrega da loja</span>
+                </div>
                 <div class="metodo-card active" onclick="selecionarMetodo('Vou buscar pessoalmente', this)">
                     <img style="width: 55px; height: 55px;" src="https://i.ibb.co/xtnYRYB7/99713.png" alt="logo pix">                                                                  
                     <span class="metodo-titulo">Retirar Pessoalmente</span>
@@ -845,8 +855,7 @@
                 </div>
                 
                 <div class="metodo-card" onclick="selecionarMetodo('Vou mandar Uber/99 retirar', this)">
-                     <img style="width: 110px; height: 50px;" src="https://i.ibb.co/1YhkXdw2/99708.png" alt="logo pix">        
-                    
+                     <img style="width: 110px; height: 50px;" src="https://i.ibb.co/1YhkXdw2/99708.png" alt="logo pix">                           
                     <span class="metodo-titulo">Mandar Uber/99</span>
                     <span class="metodo-sub">Aplicativo retira para mim</span>
                 </div>
@@ -1017,6 +1026,31 @@
                             container.appendChild(div);
                             element = div;
                         }
+                            
+                            else if (idNum >= 300 && idNum <= 399) {
+    const container = document.getElementById('lista-produtos-vertical');
+    const div = document.createElement('div');
+    div.id = 'prod-' + id;
+    
+    // Estilo idêntico ao layout de lista de itens (um embaixo do outro)
+    div.className = 'cart-item'; 
+    div.style.margin = '0';
+    
+    div.innerHTML = `
+        <img src="" class="cart-item-img prod-img">
+        <div class="cart-item-info">
+            <strong class="prod-nome" style="font-size:15px; color:var(--rodape);">...</strong>
+            <div class="cart-item-row">
+                <span class="prod-preco-novo" style="color: #2a9d8f; font-weight:700; font-size:14px;">...</span>
+                <div class="cart-controls">
+                    <button class="btn-add" onclick="addToCartByElement('prod-${id}', event)" style="padding: 6px 15px; margin-top: 0; font-size: 13px; width: auto;">Adicionar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+    element = div;
+}
                          else if (idNum >= 200 && idNum <= 299) {
                              
     // CRIA A CÓPIA PEQUENA EXCLUSIVA PARA DENTRO DO CARRINHO                  
@@ -1373,6 +1407,7 @@ function removeItem(index) {
     }
     
     // --- LINHAS PARA CORRIGIR O ERRO DO PIX ---
+    document.getElementById('cardFazerEntrega').style.display = "none"; 
     document.getElementById('blocoPix').style.display = 'none'; // Esconde o Pix antigo de 4 produtos
     document.getElementById('btnGerarPix').style.display = 'block'; // Mostra o botão para gerar um novo Pix
     document.getElementById('btnGerarPix').innerText = "Pagar com Pix"; // Reseta o texto do botão
@@ -1400,6 +1435,7 @@ function removeItem(index) {
                     btn.style.background = "var(--verde)";
                     btn.style.color = "white";
                     document.getElementById('areaNome').style.display = "block";
+                    document.getElementById('cardFazerEntrega').style.display = "flex";
                 }, () => {
                     alert("Ative a localização para continuar.");
                     btn.innerText = "Confirmar Localização Exata";
